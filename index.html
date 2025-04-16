@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>格点路径挑战游戏</title>
+  <script>
+    let size = 5;
+    let grid = [];
+    let score = 0;
+    let total = 0;
+
+    function generateGrid() {
+      const table = document.getElementById("grid");
+      table.innerHTML = "";
+      grid = Array.from({ length: size }, () => Array(size).fill(0));
+      score = 0;
+      total = 0;
+      updateScore();
+
+      for (let i = 0; i < size; i++) {
+        const row = document.createElement("tr");
+        for (let j = 0; j < size; j++) {
+          if (j < size - i) {
+            const cell = document.createElement("td");
+            cell.dataset.i = i;
+            cell.dataset.j = j;
+            cell.addEventListener("click", () => handleClick(cell, i, j));
+            row.appendChild(cell);
+          } else {
+            row.appendChild(document.createElement("td"));
+          }
+        }
+        table.appendChild(row);
+      }
+    }
+
+    function handleClick(cell, i, j) {
+      const val = prompt(`输入从A到(${i},${j})的路径数：`);
+      if (val === null) return;
+      const correct = calculatePaths(i, j);
+      total++;
+      if (parseInt(val) === correct) {
+        cell.innerText = val;
+        cell.style.backgroundColor = "#c8facc";
+        score++;
+      } else {
+        alert(`答错啦！正确答案是 ${correct}`);
+        cell.innerText = correct;
+        cell.style.backgroundColor = "#fdd";
+      }
+      updateScore();
+    }
+
+    function calculatePaths(i, j) {
+      const memo = {};
+      function dp(x, y) {
+        if (x === size - 1 || y === 0) return 1;
+        const key = `${x},${y}`;
+        if (memo[key]) return memo[key];
+        return memo[key] = dp(x + 1, y) + dp(x, y - 1);
+      }
+      return dp(i, j);
+    }
+
+    function updateScore() {
+      document.getElementById("score").innerText = `得分：${score} / ${total}`;
+    }
+
+    function nextLevel() {
+      size++;
+      generateGrid();
+    }
+
+    window.onload = generateGrid;
+  </script>
+  <style>
+    table { border-collapse: collapse; margin-top: 20px; }
+    td {
+      width: 50px; height: 50px; border: 1px solid #aaa;
+      text-align: center; vertical-align: middle;
+      font-size: 18px; cursor: pointer;
+    }
+    button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🎯 楼梯图路径挑战游戏</h2>
+  <p>点击任意一个格子，输入你猜测的从 A 到该格子的路径条数。</p>
+  <p id="score">得分：0 / 0</p>
+  <button onclick="nextLevel()">下一关（扩大格子）</button>
+  <table id="grid"></table>
+</body>
+</html>
